@@ -27,3 +27,15 @@ most_black <- max(nation_df$black_tot)
 most_white <- max(nation_df$white_tot)
 most_latinx <- max(nation_df$latinx_pop)
 most_aapi <- max(nation_df$aapi_pop)
+
+max_tot_year <- (filter(nation_df, total_inc == most_tot))$year
+max_black_year <- (filter(nation_df, black_tot == most_black))$year
+max_white_year <- (filter(nation_df, white_tot == most_white))$year
+max_latinx_year <- (filter(nation_df, latinx_pop == most_latinx))$year
+max_aapi_year <- (filter(nation_df, aapi_pop == most_aapi))$year
+
+highest_nat_tot <- paste0(most_tot, ", ", max_tot_year)
+highest_black <- paste0((most_black), ", ", max_black_year)
+highest_white <- paste0(most_white, ", ", max_white_year)
+highest_latinx <- paste0(most_latinx, ", ", max_latinx_year)
+highest_aapi <- paste0(most_aapi, ", ", max_aapi_year)
