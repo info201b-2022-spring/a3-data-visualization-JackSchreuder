@@ -8,7 +8,8 @@ date: '2022-05-21'
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
-library(rgdal)
+library(geojsonio)
+library(broom)
 ```
 
 ## Introduction
@@ -40,6 +41,16 @@ A similar trend should be noticed here, as there are nearly as many black people
 
 ## Trends Over Time Chart
 
+```{r nation_df, include=FALSE}
+incarc_df <- read.csv("incarceration_trends.csv")
+nation_df <- incarc_df %>% group_by(year) %>% summarise(total_inc = sum(total_pop),
+                                                        black_tot = sum(black_jail_pop, na.rm=TRUE),
+                                                        white_tot = sum(white_jail_pop, na.rm=TRUE),
+                                                        latinx_pop = sum(latinx_jail_pop, na.rm=TRUE),
+                                                        aapi_pop = sum(aapi_jail_pop, na.rm=TRUE))
+nation_df <- nation_df %>% filter(year >= 1985)
+```
+
 ```{r totch1}
 colors <- c("Black Total" = "black", "White Total" = "blue", "LatinX Total" = "orange")
 
@@ -52,7 +63,6 @@ ggplot(nation_df, aes(x=year))+
        y="Number of Incarcerations",
        color = "Legend")+
   scale_color_manual(values=colors)
-
 ```
 This chart shows the differences in yearly incarcerations through time. We see that accross all three of the displayed racial groupings, the number of incarcerations is steadily increasing until about 2010 when it starts to slow down. Notably, white and black totals remain very similar to eachother until 2000, when white jumps ahead significantly. As mentioned in the summary info portion, this is a surprising trend because there are far fewer black people than white people. So the conclusion that there must be something in the justice system that is condemning more black and/or fewer white people than necessary. 
 
@@ -79,9 +89,28 @@ These two charts are included to compare the trends of black and white incarcera
 
 ## Map Chart
 
-```{r mch3}
-download.file("https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_outline_500k.zip", destfile = "a3-data-visualization-JackSchreuder/state_shape.zip")
-system("unzip a3-data-visualization-JackSchreuder/state_shape.zip")
+```{r mch3p1, include=FALSE}
+state_df <- incarc_df %>% group_by(state, year) %>% summarise(total_incarcerated = sum(total_pop),
+                                                              black_tot = sum(black_jail_pop),
+                                                              white_tot = sum(white_jail_pop),
+                                                              latinx_pop = sum(latinx_jail_pop),
+                                                              aapi_pop = sum(aapi_jail_pop))
+states_gb_df <- state_df %>% group_by(state) %>% summarise(mean_tot = mean(total_incarcerated))
+states_gb_df$state <- state.name[match(states_gb_df$state,state.abb)]
+states_gb_df$index <- as.character(1:nrow(states_gb_df))
+my_spdf <- geojson_read("gz_2010_us_040_00_5m.json", what="sp")
+spdf_fort <- tidy(my_spdf)
+spdf_fort <- spdf_fort %>%
+  left_join(. , states_gb_df, by=c("id" = "index"))
 ```
 
+```{r mch3p2}
+ggplot()+
+  geom_polygon(data=spdf_fort, aes(fill=mean_tot, x=long, y=lat, group=group))+
+  theme_void()+
+  coord_map()+
+  labs(title = "US States by Average Yearly Incarcerations",
+       subtitle = "For 1970-2018")
+```
 
+For this chart, the json data was provided by (This)[https://eric.clst.org/tech/usgeojson/] website. And the example coded provided by (R Graph Gallery)[https://r-graph-gallery.com/327-chloropleth-map-from-geojson-with-ggplot2.html]. The striking points of this map are that California, Texas, and North Dakota put the most people in prison per year accross the country. California and Texas are unsurprising, due to the large population present in both. 

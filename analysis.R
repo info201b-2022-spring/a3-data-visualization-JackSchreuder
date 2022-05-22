@@ -8,6 +8,9 @@ state_df <- incarc_df %>% group_by(state, year) %>% summarise(total_incarcerated
                                                               white_tot = sum(white_jail_pop),
                                                               latinx_pop = sum(latinx_jail_pop),
                                                               aapi_pop = sum(aapi_jail_pop))
+states_gb_df <- state_df %>% group_by(state) %>% summarise(mean_tot = mean(total_incarcerated))
+states_gb_df$state <- state.name[match(states_gb_df$state,state.abb)]
+states_gb_df$index <- as.character(1:nrow(states_gb_df))
 
 mean_total <- mean(state_df$total_incarcerated, na.rm = TRUE)
 mean_white <- mean(state_df$white_tot, na.rm=TRUE)
