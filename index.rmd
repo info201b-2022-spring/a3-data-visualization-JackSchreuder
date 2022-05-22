@@ -1,0 +1,87 @@
+---
+title: "index.rmd"
+output: html_document
+date: '2022-05-21'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(rgdal)
+```
+
+## Introduction
+
+This analysis will consist of investigating trends of total jailed populations for four different racial groups, Latinx, AAPI, Black, and White. Summary statistics were calculated to see a brief glimpse into any difference between these racial groups, to obtain these, please run the analysis.R file. 
+
+In the table below, find the highest number of incarceration and the year which recorded that number for each ethnic group:
+
+Ethnicity | Incarceration count | Year
+----------|---------------------|------
+AAPI | 8850.86 | 2014
+Black | 299260.91 | 2008
+LatinX | 131398.96 | 2008
+White | 352336.38 | 2017
+US Total | 327167434 | 2018
+
+The first important thing to notice is that the earliest date is 2008, despite the data set going back to 1970, this shows that within the last two decades, there are more people being incarcerated than ever. This is hammered home by the US Total, which hit its peak just 4 years ago in 2018 (2018 is also the most recent year in the dataset). A second thing to note is that White people have the highest max in this list. Although, this is what one would expect given that White people make up the overwhelming majority of the US population, what is more shocking is how close the Black max is to the White number, since the size of the Black population in the US is much smaller.
+
+The next table shows the average yearly incarcerations amongst the racial groups:
+
+Ethnicity | Mean Incarcerated 1970-2018
+----------|----------------------------
+AAPI | 102.7
+Black | 5539.9
+LatinX | 1577.8
+White | 5847.4
+
+A similar trend should be noticed here, as there are nearly as many black people incarcerated on average per year as white people, despite there being proportionally far fewer black people in the US. This disproportionate statistic, paired with the earlier table's statistic suggest that there is an inequity in the justice system which either negatively effects black people, positively effects white people, or a little of both.
+
+## Trends Over Time Chart
+
+```{r totch1}
+colors <- c("Black Total" = "black", "White Total" = "blue", "LatinX Total" = "orange")
+
+ggplot(nation_df, aes(x=year))+
+  geom_line(aes(y=black_tot, color="Black Total"))+
+  geom_line(aes(y=white_tot, color="White Total"))+
+  geom_line(aes(y=latinx_pop, color="LatinX Total"))+
+  ggtitle("Incarceration Totals by Race 1985-2018")+
+  labs(x="Time in Years",
+       y="Number of Incarcerations",
+       color = "Legend")+
+  scale_color_manual(values=colors)
+
+```
+This chart shows the differences in yearly incarcerations through time. We see that accross all three of the displayed racial groupings, the number of incarcerations is steadily increasing until about 2010 when it starts to slow down. Notably, white and black totals remain very similar to eachother until 2000, when white jumps ahead significantly. As mentioned in the summary info portion, this is a surprising trend because there are far fewer black people than white people. So the conclusion that there must be something in the justice system that is condemning more black and/or fewer white people than necessary. 
+
+
+## Variable Comparison Chart
+
+```{r vcch2}
+ggplot(nation_df, aes(x=total_inc, y=black_tot))+
+  geom_point()+
+  geom_smooth()+
+  ggtitle("Total US vs Black Incarcerated Population")+
+  labs(x="Total Incarcerated Population",
+       y="Black Incarcerated Population")
+
+ggplot(nation_df, aes(x=total_inc, y=white_tot))+
+  geom_point()+
+  geom_smooth()+
+  ggtitle("Total US vs White Incarcerated Population")+
+  labs(x="Total Incarcerated Population",
+       y="White Incarcerated Population")
+```
+
+These two charts are included to compare the trends of black and white incarcerations compared to the country as a whole. Each point represents a year when the two values occured. The derivative at each point corresponds to the percentage of the nations total jailed population that is made up of a certain race. The white chart shows a very constant ratio, which means that a steady percentage of jailed individuals are white. Curiously, the black chart shows a much different story, as there is a clear peak of the ratio.
+
+## Map Chart
+
+```{r mch3}
+download.file("https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_outline_500k.zip", destfile = "a3-data-visualization-JackSchreuder/state_shape.zip")
+system("unzip a3-data-visualization-JackSchreuder/state_shape.zip")
+```
+
+

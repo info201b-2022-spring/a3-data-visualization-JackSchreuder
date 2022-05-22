@@ -2,7 +2,7 @@
 library(dplyr)
 library(ggplot2)
 
-# incarc_df <- read.csv("incarceration_trends.csv")
+incarc_df <- read.csv("incarceration_trends.csv")
 state_df <- incarc_df %>% group_by(state, year) %>% summarise(total_incarcerated = sum(total_pop),
                                                               black_tot = sum(black_jail_pop),
                                                               white_tot = sum(white_jail_pop),
